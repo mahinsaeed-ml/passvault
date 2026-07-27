@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/services/auth_service.dart';
 import '../../routes/app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -13,16 +12,28 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  final AuthService _authService = AuthService();
 
   @override
   void initState() {
     super.initState();
+    _navigate();
+  }
 
-    Timer(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.go(AppRoutes.createPin);
-      }
-    });
+  Future<void> _navigate() async {
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
+    final hasPin = await _authService.pinExists();
+
+    if (!mounted) return;
+
+    if (hasPin) {
+      context.go(AppRoutes.login);
+    } else {
+      context.go(AppRoutes.createPin);
+    }
   }
 
   @override
@@ -32,14 +43,11 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
-
             Icon(
               Icons.lock,
               size: 90,
             ),
-
             SizedBox(height: 24),
-
             Text(
               "PassVault",
               style: TextStyle(
@@ -47,9 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             SizedBox(height: 8),
-
             Text(
               "Secure Password Wallet",
               style: TextStyle(fontSize: 16),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:go_router/go_router.dart';
+import '../../routes/app_routes.dart';
 import '../../widgets/number_pad.dart';
 import '../../widgets/pin_indicator.dart';
 import '../../core/services/auth_service.dart';
@@ -30,9 +31,16 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("PIN saved securely."),
+          content: Text("PIN created successfully."),
+          duration: Duration(seconds: 1),
         ),
       );
+
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (!mounted) return;
+
+      context.go(AppRoutes.home);
     }
   }
 

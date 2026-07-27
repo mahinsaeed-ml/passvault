@@ -9,6 +9,7 @@ import 'theme/app_theme.dart';
 
 void main() {
   runApp(const PassVaultApp());
+
 }
 
 class PassVaultApp extends StatelessWidget {

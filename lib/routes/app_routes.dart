@@ -3,4 +3,5 @@ class AppRoutes {
   static const login = '/login';
   static const createPin = '/create-pin';
   static const home = '/home';
+  static const createCredential = '/create-credential';
 }
