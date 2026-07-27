@@ -1,40 +1,39 @@
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../crypto/hash_service.dart';
 
 class AuthService {
-  static const _pinKey = 'user_pin_hash';
+  static const String _pinKey = 'user_pin_hash';
 
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
-  final HashService _hashService = const HashService();
+  final HashService _hashService = HashService();
 
   Future<void> savePin(String pin) async {
+    final prefs = await SharedPreferences.getInstance();
     final hash = _hashService.hashPin(pin);
-
-    await _storage.write(
-      key: _pinKey,
-      value: hash,
-    );
+    await prefs.setString(_pinKey, hash);
   }
 
   Future<bool> pinExists() async {
-    final value = await _storage.read(key: _pinKey);
-    return value != null;
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey(_pinKey);
   }
 
   Future<bool> verifyPin(String pin) async {
-    final stored = await _storage.read(key: _pinKey);
+    final prefs = await SharedPreferences.getInstance();
 
-    if (stored == null) {
+    final storedHash = prefs.getString(_pinKey);
+
+    if (storedHash == null) {
       return false;
     }
 
-    final hash = _hashService.hashPin(pin);
+    final enteredHash = _hashService.hashPin(pin);
 
-    return hash == stored;
+    return storedHash == enteredHash;
   }
 
   Future<void> clearPin() async {
-    await _storage.delete(key: _pinKey);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_pinKey);
   }
 }
