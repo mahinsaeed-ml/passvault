@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../widgets/number_pad.dart';
 import '../../widgets/pin_indicator.dart';
-
+import '../../core/services/auth_service.dart';
 class CreatePinScreen extends StatefulWidget {
   const CreatePinScreen({super.key});
 
@@ -11,9 +11,10 @@ class CreatePinScreen extends StatefulWidget {
 }
 
 class _CreatePinScreenState extends State<CreatePinScreen> {
+  final AuthService _authService = AuthService();
   final List<String> _pin = [];
 
-  void _addDigit(String digit) {
+  Future<void> _addDigit(String digit) async {
     if (_pin.length >= 4) return;
 
     setState(() {
@@ -21,15 +22,17 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
     });
 
     if (_pin.length == 4) {
-      Future.delayed(const Duration(milliseconds: 300), () {
-        if (!mounted) return;
+      final pin = _pin.join();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("PIN Entered: ${_pin.join()}"),
-          ),
-        );
-      });
+      await _authService.savePin(pin);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("PIN saved securely."),
+        ),
+      );
     }
   }
 
@@ -74,6 +77,39 @@ class _CreatePinScreenState extends State<CreatePinScreen> {
             NumberPad(
               onNumberPressed: _addDigit,
               onBackspace: _removeDigit,
+            ),
+
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () async {
+                final result = await _authService.verifyPin("1234");
+
+                if (!mounted) return;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Verify 1234 = $result"),
+                  ),
+                );
+              },
+              child: const Text("Test Verify"),
+            ),
+
+            const SizedBox(height: 10),
+
+            ElevatedButton(
+              onPressed: () async {
+                await _authService.clearPin();
+
+                if (!mounted) return;
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("PIN cleared"),
+                  ),
+                );
+              },
+              child: const Text("Clear PIN"),
             ),
 
             const SizedBox(height: 30),
